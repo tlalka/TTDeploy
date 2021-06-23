@@ -5,8 +5,8 @@ import axios from 'axios';
 class Tweet extends React.Component{
     constructor(props){
         super(props);
-        
-        let init_val = ''
+
+        let init_val = '';
 
         if (this.props.value === undefined) {
             init_val = '';
@@ -20,7 +20,7 @@ class Tweet extends React.Component{
         };
         this.handleChange =        this.handleChange.bind(this);
         this.fileHandler =        this.fileHandler.bind(this);
-    } 
+    }
     handleChange(event){
         const text = event.target.value;
         this.setState({value: text});
@@ -29,18 +29,18 @@ class Tweet extends React.Component{
     fileHandler(event)  {
         this.setState({file: event.target.files[0]});
         const upload = event.target.files[0];
-        //console.log(upload); 
+        console.log(upload);
         let postData = this.props.uploadData;
         //postData = Object.assign({'file': event.target.files[0]}, postData);
-        //console.log(postData);
+        console.log(postData);
         let formdata = new FormData();
         for(const field in postData){
             formdata.append(field, postData[field])
         }
-        formdata.append("file", event.target.files[0]); 
+        formdata.append("file", event.target.files[0]);
         /*
         for (var pair of formdata.entries()) {
-            console.log(pair[0]+ ', ' + pair[1]); 
+            console.log(pair[0]+ ', ' + pair[1]);
         }
         */
         //this.props.onUpload("media"+this.props.id, upload);
@@ -49,19 +49,20 @@ class Tweet extends React.Component{
         xhr.open("POST", this.props.uploadUrl);
         xhr.send(formdata);
         */
-        //const header = {'Content-Type': 'multipart/form-data'};
-        
+        const header = {'Access-Control-Allow-Origin': '*'};
+        console.log(formdata);
         axios.post(this.props.uploadUrl, formdata).then(
+        //axios.post(this.props.uploadUrl, formdata, {headers: header}).then(
             response => {
-                //console.log(response);
-                
+                console.log(response);
+
                 this.props.onUpload("media"+this.props.id, this.props.uploadUrl+postData['key'].slice(0,-11)+upload.name);
-            }, 
+            },
             error => {
                 console.log(error);
             }
         )
-        
+
     }
 
     render(){
@@ -69,23 +70,23 @@ class Tweet extends React.Component{
         //console.log(this.state.value)
         if(this.state.value.length <= 280){
             charlimit = <div className="b-5">
-                        {this.state.value.length}/280 
+                        {this.state.value.length}/280
                         </div>
         }
         else {
             charlimit = <div className="b-5-red">
-                        {this.state.value.length}/280 
+                        {this.state.value.length}/280
                         </div>
         }
-        
+
         return(
         <div>
         <textarea type="text2" id="tweet" name="tweet" onChange={this.handleChange} value={this.state.value}/>
         <div className = "sub-body2">
-        
+
         <div className="b-4"><input type="file" onChange={this.fileHandler}/></div>
             {charlimit}
-        </div> 
+        </div>
         </div>
         )
     }

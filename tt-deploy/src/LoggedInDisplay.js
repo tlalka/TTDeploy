@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import * as Paths from './SourcePath';
 
 class LoggedInDisplay extends Component {
     constructor () {
         super()
         this.state = {
             username: ""
-        }        
+        }
     }
 
     componentDidMount() {
-        axios.get("https://api.threadedtweeter.com/v2/login/status", {withCredentials: true}).then(
+        axios.get(Paths.ourPath + "/login/status", {withCredentials: true}).then(
             response => {
                 if (response.data.loginStatus){
                     this.setState({

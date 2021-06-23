@@ -7,6 +7,7 @@ import Contact from './Contact';
 import Help from './Help';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
+import * as Paths from './SourcePath';
 
 const cookies = new Cookies();
 
@@ -19,8 +20,8 @@ class Page extends Component {
                      loginUrl: '',
                      resourceOwnerKeyCookie: '',
                      resourceOwnerSecretCookie: '',
-                     username: null}; 
-    
+                     username: null};
+
     this.handleHelp = this.handleHelp.bind(this);
     this.handleContact = this.handleContact.bind(this);
     this.handleHome = this.handleHome.bind(this);
@@ -39,18 +40,18 @@ class Page extends Component {
     handleHome(){
         this.setState({help: false, contact: false});
     }
-    
+
     logout() {
         //console.log('logging out')
-        cookies.remove('access_token_key',  { path: '/', domain : '.threadedtweeter.com' });
-        cookies.remove('access_token_secret',  { path: '/', domain : '.threadedtweeter.com' }); 
+        cookies.remove('access_token_key',  { path: '/', domain : Paths.ourDomain });
+        cookies.remove('access_token_secret',  { path: '/', domain : Paths.ourDomain });
         window.location.reload();
     }
-    
+
     checkLoginStatus() {
         let temp = Object.assign({}, this.state);
 
-        return axios.get("https://api.threadedtweeter.com/v2/login/status", {withCredentials: true}).then(
+        return axios.get(Paths.ourPath + "/login/status", {withCredentials: true}).then(
             response => {
                 temp.isLoggedIn = response.data.Status;
                 temp.username = response.data.username;
@@ -62,13 +63,13 @@ class Page extends Component {
             }
         );
     }
-     
+
     componentDidMount() {
         this.checkLoginStatus().then(
             response => {
                 if (!this.state.isLoggedIn) {
-                    //console.log('not logged in part 2')
-                    axios.get('https://api.threadedtweeter.com/v2/login?mode=webapp').then(
+                    //If we are not logged in, call the backend loginAPI
+                    axios.get(Paths.ourPath + '/login?mode=webapp').then(
                         response => {
                             this.setState({
                                 loginUrl : response.data.url,
@@ -77,30 +78,35 @@ class Page extends Component {
                                 isLoggedIn : false,
                                 username : null
                             })
-                            
+
                             let keyCookie = this.state.resourceOwnerKeyCookie.split(";")[0].split("=")[1];
                             let secretCookie = this.state.resourceOwnerSecretCookie.split(";")[0].split("=")[1];
-            
-                            cookies.set('resource_owner_key', keyCookie, {path : '/', expires : new Date('2020-1-1'), domain : '.threadedtweeter.com'});
-                            cookies.set('resource_owner_secret', secretCookie, {path : '/', expires : new Date('2020-1-1'), domain : '.threadedtweeter.com'});
-                        } 
-                    ); 
+
+                            //somehow, react is failing to set these cookies
+                            let exp = new Date();
+                            exp.setDate(exp.getDate()+100);
+
+                            cookies.set('resource_owner_key', keyCookie, {path : '/', expires : exp, domain : Paths.ourDomain});
+                            cookies.set('resource_owner_secret', secretCookie, {path : '/', expires : exp, domain : Paths.ourDomain});
+
+                        }
+                    );
                 }
             }
         )
 
     }
-    
+
     render() {
-        
+
         //console.log(this.state.username + ", " + this.state.resourceOwnerSecretCookie + ", " + this.state.resourceOwnerKeyCookie + ", " + this.state.loginUrl + ", " + this.state.isLoggedIn);
-        
+
         let content;
-        
+
         const header = <Header handleHome= {this.handleHome} checkLoginStatus = {this.checkLoginStatus} componentDidMount = {this.componentDidMount} logout = {this.logout} loginUrl = {this.state.loginUrl} resourceOwnerKeyCookie = {this.state.resourceOwnerKeyCookie} resourceOwnerSecretCookie = {this.state.resourceOwnerSecretCookie} username = {this.state.username} isLoggedIn = {this.state.isLoggedIn}/>;
-        
+
         const footer = <Footer handleHelp = {this.handleHelp} handleContact = {this.handleContact} handleHome= {this.handleHome}/>;
-        
+
             if(this.state.help === true){//help page
                 content = <div className = "bodystyle">
             {header}
@@ -116,7 +122,7 @@ class Page extends Component {
                 </div>
             }
             else if(this.state.isLoggedIn === true){//normal tweet page
-                content = 
+                content =
                     <div className = "bodystyle">
                     {header}
                     <Body handleHelp= {this.handleHelp} username = {this.state.username}/>
@@ -126,7 +132,7 @@ class Page extends Component {
         else{//splash
             content = <Splash handleHelp = {this.handleHelp} handleContact = {this.handleContact} checkLoginStatus = {this.checkLoginStatus} componentDidMount = {this.componentDidMount} logout = {this.logout} loginUrl = {this.state.loginUrl} resourceOwnerKeyCookie = {this.state.resourceOwnerKeyCookie} resourceOwnerSecretCookie = {this.state.resourceOwnerSecretCookie} username = {this.state.username} isLoggedIn = {this.state.isLoggedIn}/>;
         }
-        
+
         return (
             <div>
             {content}

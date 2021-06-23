@@ -10,20 +10,21 @@ const customStyles = {
         bottom                : 'auto',
         marginRight           : '-50%',
         transform             : 'translate(-50%, -50%)',
-        padding               : '0px'      
+        padding               : '0px'
     }
 };
 
 class OurModal extends React.Component {
     constructor(props){
         super(props);
-        this.state = {                                               Bsplitting: props.Bsplitting,
+        this.state = {
+                      Bsplitting: props.Bsplitting,
                       splitting: props.splitting,
-                      showModal: props.showModal};   
+                      showModal: props.showModal};
     }
 
-    
-    
+
+
 
     render() {
                 let split;
@@ -45,11 +46,11 @@ class OurModal extends React.Component {
             {split}
             <div className="b-2">
             <button type="button" className="notbutton" onClick={this.props.handleOpenModal}>Splitting options</button>
-            <ReactModal 
+            <ReactModal
             isOpen={this.props.showModal} style={customStyles}>
             <div className="modal-header">
             <div className="modal-title" id="exampleModalLabel">
-            Tweet splitting allows us to formate your thread for you.
+            Tweet splitting allows us to format your thread for you.
             </div>
             <button  onClick={this.props.handleCloseModal} type="button" className="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
@@ -57,7 +58,7 @@ class OurModal extends React.Component {
             </div>
             <div className="modal-body">
             <div>
-            Basic splitting: 
+            Basic splitting:
             <input
             name="Bsplitting"
             type="checkbox"
@@ -69,7 +70,12 @@ class OurModal extends React.Component {
             <div className="modal-footer">
             <div className="b-7" data-dismiss="modal"><button type="submit2"onClick={this.props.handleCancel}>cancel</button></div>
             <div className="b-6">
-            <button type="submit2" onClick={this.props.handleSplitting}> submit </button>
+            <button type="submit2" onClick={() => {
+              console.log(this.props.splitting);
+              if(this.props.splitting){
+              this.props.handleSplitting();
+            }
+            }}> submit </button>
             </div>
             </div>
             </ReactModal>
