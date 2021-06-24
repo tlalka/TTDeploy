@@ -5,6 +5,9 @@ import axios from "axios";
 import Success from './Success';
 import Fail from './Fail';
 import * as Paths from './SourcePath';
+import Cookies from 'universal-cookie';
+
+const cookies = new Cookies();
 
 class Body extends React.Component {
     constructor(props){
@@ -58,7 +61,8 @@ class Body extends React.Component {
         let thread = {"TWEETS" : tweets};
         //console.log(JSON.stringify(thread));
         let xhttp = new XMLHttpRequest();
-        xhttp.open("POST", Paths.ourPath + "/post-thread", false);
+        let postPath = Paths.ourPath + "/post-thread?access_token_key=" + cookies.get("access_token_key") + "&access_token_secret=" + cookies.get("access_token_secret");
+        xhttp.open("POST", postPath, false);
         xhttp.withCredentials=true;
         xhttp.send(JSON.stringify(thread));
         let response = xhttp.response;
@@ -113,20 +117,16 @@ class Body extends React.Component {
         //console.log("Splitting");
 
         let full_text = "";
-
-        //console.log("enter loop");
+        let chars_to_search_for = ".,;:! ?"
 
         for (let i = 0; i < this.state.boxes.length; i++)
         {
             full_text += this.state['tweet'+i] + " ";
         }
 
-
+        //clear current boxes
         while(this.state.boxes.length > 0)
         {
-            //console.log("adding text");
-
-
             this.handleremovebox();
         }
 
@@ -139,19 +139,31 @@ class Body extends React.Component {
 
         //console.log(this.state.boxes.length);
 
-        const splitAt = index => x => [x.slice(0, index), x.slice(index + 1)];
+        const splitAt = index => x => [x.slice(0, index), x.slice(index)];
 
-        if (full_text.length === 0)
+        if (full_text.length == 0){
             this.setState({['tweet0']: ''});
+          }
 
         else
         {
             if (full_text.length > 280)
             {
-                let search_index = 279;
+              //this is where the splitting acutally happends
+                let search_index = 279; //max length of a tweet
                 let text_collection = [];
-                while (full_text[search_index] != ' ')
+
+                //deciding where to split
+                //if there is no space within the index, simply split at the end of it
+                while (! chars_to_search_for.includes(full_text[search_index])){
                     search_index--;
+
+                    if(search_index <= 1){
+                      //did not find a place to split
+                      search_index = 280;
+                      break;
+                    }
+                  }
 
                 let split_text = splitAt(search_index)(full_text);
                 this.setState({['tweet0']: split_text[0]});
@@ -159,8 +171,17 @@ class Body extends React.Component {
                 while(split_text[1].length > 280)
                 {
                     search_index = 279;
-                    while (split_text[1][search_index] != ' ')
+
+                    while (! chars_to_search_for.includes(full_text[search_index])){
                         search_index--;
+
+                        if(search_index <= 1){
+                          //did not find a place to split
+                          search_index = 280;
+                          break;
+                        }
+                      }
+
                     split_text = splitAt(search_index)(split_text[1]);
                     text_collection.push(split_text[0]);
                 }
@@ -173,7 +194,6 @@ class Body extends React.Component {
                     this.setState({['tweet'+(j+1)]: text_collection[j]});
                 }
 
-
             }
 
             else
@@ -183,7 +203,6 @@ class Body extends React.Component {
 
         this.setState({ showModal: false });
         //this.setState({ re_render: true });
-
     }
 
     handleCancel () {

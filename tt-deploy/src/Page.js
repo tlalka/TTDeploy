@@ -8,7 +8,6 @@ import Help from './Help';
 import axios from 'axios';
 import Cookies from 'universal-cookie';
 import * as Paths from './SourcePath';
-import {useLocation} from "react-router-dom";
 
 const cookies = new Cookies();
 
@@ -53,7 +52,7 @@ class Page extends Component {
     checkLoginStatus() {
         let temp = Object.assign({}, this.state);
 
-        return axios.get(Paths.ourPath + "/login/status", {withCredentials: true}).then(
+        return axios.get(Paths.ourPath + "/login/status?access_token_key=" + cookies.get("access_token_key") + "&access_token_secret=" + cookies.get("access_token_secret"), {withCredentials: true}).then(
             response => {
                 temp.isLoggedIn = response.data.Status;
                 temp.username = response.data.username;
@@ -75,7 +74,8 @@ class Page extends Component {
         let querytype = params.get('querytype');
 
         //set login cookies to query values
-        if(querytype = 'loginverify'){
+        if(querytype == 'loginverify'){
+          console.log("login query ran");
           let access_token_key = params.get('access_token_key');
           let access_token_secret = params.get('access_token_secret');
           let exp = new Date();
