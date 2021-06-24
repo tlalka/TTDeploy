@@ -1,9 +1,9 @@
-const testPath = "http://127.0.0.1:5000/v2";
+const devPath = "http://127.0.0.1:5000/v2";
 const prodPath = "https://0n0zjltdyi.execute-api.us-east-1.amazonaws.com/dev/v2";
 
 //path for the cookies
-const testDomain = "127.0.0.1";
-const prodDomain = '0n0zjltdyi.execute-api.us-east-1.amazonaws.com'
+const devDomain = "127.0.0.1";
+const prodDomain = 'threaded-tweeter-site.s3.us-east-2.amazonaws.com'
 
-export const ourPath = testPath;
-export const ourDomain = testDomain;
+export const ourPath = prodPath;
+export const ourDomain = prodDomain;

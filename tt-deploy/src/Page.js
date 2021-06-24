@@ -27,6 +27,7 @@ class Page extends Component {
     this.handleHome = this.handleHome.bind(this);
     this.logout = this.logout.bind(this);
     this.checkLoginStatus = this.checkLoginStatus.bind(this);
+    this.checkQueries = this.checkQueries.bind(this);
     this.componentDidMount = this.componentDidMount.bind(this);
     }
     handleHelp(){
@@ -51,7 +52,7 @@ class Page extends Component {
     checkLoginStatus() {
         let temp = Object.assign({}, this.state);
 
-        return axios.get(Paths.ourPath + "/login/status", {withCredentials: true}).then(
+        return axios.get(Paths.ourPath + "/login/status?access_token_key=" + cookies.get("access_token_key") + "&access_token_secret=" + cookies.get("access_token_secret"), {withCredentials: true}).then(
             response => {
                 temp.isLoggedIn = response.data.Status;
                 temp.username = response.data.username;
@@ -64,33 +65,37 @@ class Page extends Component {
         );
     }
 
+    checkQueries(){
+        //const search = useLocation().search;
+        //if the query type is loginverify
+        //const queryType = new URLSearchParams(search).get('queryType');
+        let search = window.location.search;
+        let params = new URLSearchParams(search);
+        let querytype = params.get('querytype');
+
+        //set login cookies to query values
+        if(querytype == 'loginverify'){
+          console.log("login query ran");
+          let access_token_key = params.get('access_token_key');
+          let access_token_secret = params.get('access_token_secret');
+          let exp = new Date();
+          exp.setDate(exp.getDate()+100);
+          cookies.set('access_token_key', access_token_key, {path : '/', expires : exp, domain : Paths.ourDomain});
+          cookies.set('access_token_secret', access_token_secret, {path : '/', expires : exp, domain : Paths.ourDomain});
+        }
+        return;
+    }
+
     componentDidMount() {
+        this.checkQueries()
         this.checkLoginStatus().then(
             response => {
                 if (!this.state.isLoggedIn) {
-                    //If we are not logged in, call the backend loginAPI
-                    axios.get(Paths.ourPath + '/login?mode=webapp').then(
-                        response => {
-                            this.setState({
-                                loginUrl : response.data.url,
-                                resourceOwnerKeyCookie : response.data.cookie_1,
-                                resourceOwnerSecretCookie : response.data.cookie_2,
-                                isLoggedIn : false,
-                                username : null
-                            })
-
-                            let keyCookie = this.state.resourceOwnerKeyCookie.split(";")[0].split("=")[1];
-                            let secretCookie = this.state.resourceOwnerSecretCookie.split(";")[0].split("=")[1];
-
-                            //somehow, react is failing to set these cookies
-                            let exp = new Date();
-                            exp.setDate(exp.getDate()+100);
-
-                            cookies.set('resource_owner_key', keyCookie, {path : '/', expires : exp, domain : Paths.ourDomain});
-                            cookies.set('resource_owner_secret', secretCookie, {path : '/', expires : exp, domain : Paths.ourDomain});
-
-                        }
-                    );
+                    //We are not logged in.
+                    this.setState({
+                        isLoggedIn : false,
+                        username : null
+                    })
                 }
             }
         )
