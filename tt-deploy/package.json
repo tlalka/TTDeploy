@@ -5,10 +5,10 @@
   "dependencies": {
     "axios": "^0.18.0",
     "query-string": "^6.2.0",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
+    "react": "^16.8",
+    "react-dom": "^16.8",
     "react-modal": "^3.6.1",
-    "react-router-dom": "^4.3.1",
+    "react-router-dom": "^5.1.2",
     "react-scripts": "2.1.1",
     "react-twitter-widgets": "^1.7.1",
     "universal-cookie": "^3.0.4"
@@ -19,7 +19,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy" : "aws s3 sync build/ s3://threaded-tweeter-site"
+    "deploy": "aws s3 sync build/ s3://threaded-tweeter-site"
   },
   "eslintConfig": {
     "extends": "react-app"
